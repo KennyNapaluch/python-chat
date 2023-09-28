@@ -29,7 +29,7 @@ def receive_messages(client_socket, client_address):
             message = client_socket.recv(1024).decode('utf-8')
             if not message:
                 break
-            safe_print(f"{you} says: {message}")
+            safe_print(f"{you} says: {message}\n\n")
         except Exception as e:
             safe_print(f"Error receiving message from {client_address[0]}:{client_address[1]}: {str(e)}")
             client_socket.close()
