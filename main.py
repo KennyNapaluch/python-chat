@@ -72,7 +72,7 @@ def client_thread(remote_host, remote_port):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         client_socket.connect((remote_host, remote_port))
-        safe_print(f"Connected to {remote_host}:{remote_port}")
+        safe_print(f"Connected to {remote_host}:{remote_port}\n\n")
         # Start a thread to receive messages from the server
         receive_thread = threading.Thread(target=receive_messages, args=(client_socket, (remote_host, remote_port)))
         receive_thread.start()
