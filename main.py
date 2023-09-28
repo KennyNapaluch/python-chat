@@ -24,7 +24,6 @@ def safe_print(message):
 
 
 def receive_messages(client_socket, client_address):
-    safe_print(f"Connected to {you}")
     while True:
         try:
             message = client_socket.recv(1024).decode('utf-8')
@@ -58,7 +57,7 @@ def server_thread():
         safe_print("Waiting for connections...")
         while True:
             client_socket, client_address = server_socket.accept()
-            safe_print(f"Connected to {you} @ {client_address[0]}:{client_address[1]}")
+            safe_print(f"Connected to {you} @ {client_address[0]}:{client_address[1]}\n\n")
             # Start a thread to receive messages from the client
             receive_thread = threading.Thread(target=receive_messages, args=(client_socket, client_address))
             receive_thread.start()
