@@ -1,72 +1,57 @@
 import socket
 import threading
 
-# Create a socket object
-socket_instance = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Bind the socket to a specific host and port
-host = '127.0.0.1'  # Listen on localhost
-port = 8889
-socket_instance.bind((host, port))
-
-# Maintain a list of connected peers
-peers = []
-
-
-# Function to send messages to all connected peers
-def broadcast(message, sending_peer):
-    for peer in peers:
-        if peer != sending_peer:
-            try:
-                peer.send(message)
-            except:
-                # Remove the peer if there's an issue with the connection
-                remove_peer(peer)
-
-
-# Function to remove a peer from the list
-def remove_peer(peer):
-    if peer in peers:
-        peers.remove(peer)
-
-
-# Function to handle individual peer connections
-def handle_peer(peer):
+# Function to handle receiving messages
+def receive_messages(client_socket):
     while True:
         try:
-            message = peer.recv(1024)
-            if not message:
-                remove_peer(peer)
-                break
-            broadcast(message, peer)
-        except:
-            remove_peer(peer)
+            message = client_socket.recv(1024).decode('utf-8')
+            print(message)
+        except Exception as e:
+            print(f"Error receiving message: {str(e)}")
             break
 
 
-# Start listening for incoming connections
-socket_instance.listen()
-
-print(f"Server is listening on {host}:{port}")
-
-
-# Function to accept incoming peer connections
-def accept_peers():
+# Function to handle sending messages
+def send_messages(client_socket):
     while True:
-        peer, peer_address = socket_instance.accept()
-        peers.append(peer)
-        print(f"Connection established with {peer_address}")
-
-        # Create a thread to handle the peer
-        peer_thread = threading.Thread(target=lambda: handle_peer(peer))
-        peer_thread.start()
+        message = input()
+        client_socket.send(message.encode('utf-8'))
 
 
-# Start accepting peer connections in a separate thread
-accept_thread = threading.Thread(target=accept_peers)
-accept_thread.start()
+# Main function to establish connections
+def main():
+    # Get the user's IP address and port number
+    host = input("Enter your IP address: ")
+    port = int(input("Enter a port number: "))
 
-# Main loop for sending messages
-while True:
-    message = input()
-    broadcast(message.encode('utf-8'), None)  # Set sending_peer to None for messages from the server
+    # Create a socket object
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        # Bind the socket to the host and port
+        server_socket.bind((host, port))
+
+        # Listen for incoming connections
+        server_socket.listen(1)
+        print("Waiting for a connection...")
+
+        # Accept the incoming connection
+        client_socket, client_address = server_socket.accept()
+        print(f"Connected to {client_address[0]}:{client_address[1]}")
+
+        # Create two threads for sending and receiving messages
+        receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
+        send_thread = threading.Thread(target=send_messages, args=(client_socket,))
+
+        # Start the threads
+        receive_thread.start()
+        send_thread.start()
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+
+if __name__ == "__main__":
+    main()
