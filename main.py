@@ -11,19 +11,18 @@ def receive_messages(client_socket, client_address):
             print(f"{client_address[0]}:{client_address[1]} says: {message}")
         except Exception as e:
             print(f"Error receiving message from {client_address[0]}:{client_address[1]}: {str(e)}")
+            client_socket.close()
             break
 
 def send_messages(client_socket, client_address):
     while True:
         try:
-            message = client_address.recv(1024).decode('utf-8')
-            if not message:
-                break
+            message = input("You: ")  # Input message from the server user
             client_socket.send(message.encode('utf-8'))
         except Exception as e:
             print(f"Error sending message to {client_address[0]}:{client_address[1]}: {str(e)}")
+            client_socket.close()
             break
-
 
 def main():
     host = '0.0.0.0'
@@ -42,7 +41,7 @@ def main():
             client_thread.start()
 
             # Create a send thread for each client
-            send_thread = threading.Thread(target=send_messages, args=(client_socket, client_socket))
+            send_thread = threading.Thread(target=send_messages, args=(client_socket, client_address))
             send_thread.start()
 
     except Exception as e:
