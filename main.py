@@ -8,6 +8,12 @@ output_lock = threading.Lock()
 adrianna_ip = '192.168.4.62'
 kenny_ip = '192.168.4.21'
 my_ip = socket.gethostbyname(socket.gethostname())
+if my_ip == kenny_ip:
+    me = 'Kenny'
+    you = 'Adrianna'
+elif my_ip == adrianna_ip:
+    me = 'Adrianna'
+    you = 'Kenny'
 port = 8888
 
 
@@ -18,13 +24,13 @@ def safe_print(message):
 
 
 def receive_messages(client_socket, client_address):
-    safe_print(f"Connected to {client_address[0]}:{client_address[1]}")
+    safe_print(f"Connected to {you}")
     while True:
         try:
             message = client_socket.recv(1024).decode('utf-8')
             if not message:
                 break
-            safe_print(f"{client_address[0]}:{client_address[1]} says: {message}")
+            safe_print(f"{you} says: {message}")
         except Exception as e:
             safe_print(f"Error receiving message from {client_address[0]}:{client_address[1]}: {str(e)}")
             client_socket.close()
@@ -44,7 +50,6 @@ def send_messages(client_socket, client_address):
 
 def server_thread():
     host = '0.0.0.0'
-    port = 8888
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -53,7 +58,7 @@ def server_thread():
         safe_print("Waiting for connections...")
         while True:
             client_socket, client_address = server_socket.accept()
-            safe_print(f"Connected to {client_address[0]}:{client_address[1]}")
+            safe_print(f"Connected to {you} @ {client_address[0]}:{client_address[1]}")
             # Start a thread to receive messages from the client
             receive_thread = threading.Thread(target=receive_messages, args=(client_socket, client_address))
             receive_thread.start()
@@ -76,16 +81,10 @@ def client_thread(remote_host, remote_port):
         send_thread = threading.Thread(target=send_messages, args=(client_socket, (remote_host, remote_port)))
         send_thread.start()
     except Exception as e:
-        safe_print(f"Error connecting to {remote_host}:{remote_port}: {str(e)}")
+        safe_print(f"Error connecting to {you} @ {remote_host}:{remote_port}: {str(e)}")
 
 
 def main():
-    if my_ip == kenny_ip:
-        me = 'Kenny'
-        you = 'Adrianna'
-    elif my_ip == adrianna_ip:
-        me = 'Adrianna'
-        you = 'Kenny'
     print("1. Start as server")
     print("2. Connect to a server")
     choice = input("Enter your choice (1/2): ")
